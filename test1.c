@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+
+//手こずった理由：凸点p→qとq→p両方を考慮に入れていなかったため
 // 2次元ベクトルを表す構造体
 typedef struct {
     double x;
@@ -8,15 +10,10 @@ typedef struct {
 
 // ベクトルABとベクトルBCの外積を計算する
 double cross_product(Point A, Point B, Point C) {
-    return (A.x*B.y)+(B.x*C.y)+(C.x*A.y)-(A.x*C.y)-(B.x*A.y)-(C.x*B.y);
+    return (A.x*B.y)+(B.x*C.y)+(C.x*A.y)-(A.x*C.y)-(B.x*A.y)-(C.x*B.y) >0;
 }
 
 // pからqへのベクトルからp->q->rの左ターンがあるかどうかをチェック
- int left_turn(Point p, Point q, Point r) {
-                        double cross = cross_product(p, q, r);
-                        return cross >0 ;
-                        }
-
 
 // Xの凸包を計算する関数
 void convex_hull(Point X[], int n) {
@@ -26,27 +23,32 @@ void convex_hull(Point X[], int n) {
 
     // すべての点の組み合わせをチェック
     for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
+        for (int j =0; j < n; ++j) {
+            if(j !=i){
             // pとqを選択
             Point p = X[i];
             Point q = X[j];
 
             // Bに追加するかどうかを判断する
             int add_edge = 1;
-            for (int k = 0; k < n; ++k) {
+            for (int k = 0; k < n+1; ++k) {
                 if (k != i && k != j) {
                     Point r = X[k];
-                    if (!left_turn(p, q, r) >0) {
-                        add_edge = 0;
+                    if (!cross_product(p, q, r)) {
+                        continue;
+                    }
+                    else{
+                        add_edge=0;
                         break;
                     }
-                }
+                }   
             }
 
             // 有効辺をBに追加
             if (add_edge) {
                 convex_hull[m++] = p;
-                convex_hull[m++] = q;
+                 }
+            continue;
             }
         }
     }
